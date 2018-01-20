@@ -100,6 +100,15 @@ const handlers = {
         this.response.speak(stopMessage);
         this.response.shouldEndSession(true);
         this.emit(':responseReady');
-
     },
+    'SessionEndedRequest': function () {
+        console.log(`Session ended: ${this.event.request.reason}`);
+    },
+    'Unhandled': function () {
+        this.attributes.speechOutput = this.t(helpMessage);
+        this.attributes.repromptSpeech = this.t(helpPrompt);
+        this.response.speak(this.attributes.speechOutput).listen(this.attributes.repromptSpeech);
+        this.emit(':responseReady');
+    },
+
 };
