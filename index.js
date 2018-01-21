@@ -8,7 +8,8 @@ const helpMessage = 'You can say tell me a quote, or, you can say exit... What c
 const helpPrompt = 'What can I help you with?';
 const stopMessage = 'Goodbye, the best goodbye, the very best';
 const imageURL = 'https://s3.amazonaws.com/trumpquotes/trumpUgly.jpg';
-
+const repromptSpeech = "Would you like to hear another quote?";
+const delay = ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .";
 
 const data = [
     'All of the women on The Apprentice flirted with me — consciously or unconsciously. That\'s to be expected. A sexual dynamic is always present between people, unless you are asexual.',
@@ -20,17 +21,17 @@ const data = [
     'They are sending people that have lots of problems, and they are bringing those problems with us. They are bringing drugs. They are bringing crime. They are rapists. And some, I assume, are good people',
     'When you see the other side chopping off heads, waterboarding doesn\'t sound very severe',
     'The concept of global warming was created by and for the Chinese in order to make U.S. manufacturing non-competitive.',
-    'Well, if I ever ran for office, Id do better as a Democrat than as a Republican - and thats not because Id be more liberal, because I\'m conservative. But the working guy would elect me. He likes me. When I walk down the street, those cabbies start yelling out their windows',
+    'Well, if I ever ran for office, I\'d do better as a Democrat than as a Republican - and thats not because I\'d be more liberal, because I\'m conservative. But the working guy would elect me. He likes me. When I walk down the street, those cabbies start yelling out their windows',
     'To be blunt, people would vote for me. They just would. Why? Maybe because I\'m so good looking',
     'If Hillary Clinton cant satisfy her husband what makes her think she can satisfy America',
     'John McCain is not a war hero. He\'s a war hero - he\'s a war hero cause he was captured. I Like people that weren\'t captured, OK, I hate to tell you.',
     'I look very much forward to showing my financials, because they are huge',
     'Sorry losers and haters, but my IQ is one of the highest - and you all know it! Please don\'t feel so stupid or insecure, it\'s not your fault',
     'I think Viagra is wonderful if you need it, if you have medical issues, if you\'ve had surgery. Ive just never needed it. Frankly, I wouldn\'t mind if there were an anti-Viagra, something with the opposite effect. I\'m not bragging. I\'m just lucky. I don\'t need it.',
-    'She does have a very nice figure... If Ivanka weren\'t my daughter, perhaps Id be dating her',
+    'She does have a very nice figure... If Ivanka weren\'t my daughter, perhaps I\'d be dating her',
     'I have never seen a thin person drinking Diet Coke',
     'My fingers are long and beautiful, as, it has been well documented, are various other parts of my body',
-    'I think Id get along very well with Vladimir Putin. I just think so. People say What do you mean I think I would get along well with him',
+    'I think I\'d get along very well with Vladimir Putin. I just think so. People say What do you mean I think I would get along well with him',
     'Heidi Klum. Sadly shes no longer a 10',
     'Everything I have done virtually has been a tremendous success',
     'Actually throughout my life my two greatest assets have been mental stability and being like really smart. Crooked Hillary Clinton also played these cards very hard and as everyone knows went down in flames. I went from VERY successful businessman to top TV Star to President of the United States on my first try. I think that would qualify as not smart but genius and a very stable genius at that',
@@ -39,7 +40,7 @@ const data = [
     'You know I\'m automatically attracted to beautiful I just start kissing them. Its like a magnet. Just kiss. I don’t even wait. And when you are a star, they let you do it. You can do anything. Grab them by the pussy. You can do anything.',
     'That makes me smart',
     'The response and recovery effort probably has never been seen for something like this. This is an island, surrounded by water. Big water. Ocean water',
-    'Before a show I will go backstage and everyone\'s getting dressed, and everything else, and you know, no men are anywhere, and I am allowed to go in because I am the owner of the pageant and therefore I am inspecting it. You know I\'m inspecting because I want to make sure that everything is good You know they are standing there with no clothes. Is everybody okay.... And you see these incredible looking women and so I sort of get away with things like that.',
+    'Before a show I will go backstage and everyone\'s getting dressed, and everything else, and you know, no men are anywhere, and I am allowed to go in because I am the owner of the pageant and therefore I am inspecting it. You know I\'m inspecting because I want to make sure that everything is good. You know they are standing there with no clothes. Is everybody okay.... And you see these incredible looking women and so I sort of get away with things like that.',
     'I would rarely leave the White House because there’s so much work to be done. I would not be a president who took vacations. I would not be a president that takes time off. You don’t have time to take time off. ',
     'Can you believe that, with all of the problems and difficulties facing the US, President Obama spent the day playing golf',
     'I would work. And I would make the country great again. That’s what you have to do',
@@ -48,7 +49,7 @@ const data = [
     'If Obama resigns from office NOW, thereby doing a great service to the country — I will give him free lifetime golf at any one of my courses!',
     'Russia, if you’re listening, I hope you’re able to find the 30,000 emails that are missing. I think you will probably be rewarded mightily by our press',
     'My wife says I\'m the biggest star in the world. But she might just be saying that because she\'s intelligent',
-    '26,000 unreported sexual assults in the military-only 238 convictions. What did these geniuses expect when they put men & women together?',
+    '26,000 unreported sexual assaults in the military-only 238 convictions. What did these geniuses expect when they put men & women together?',
     'Part of the beauty of me is that I\'m very rich',
     'It\'s certainly not groundbreaking news that the early victories by the women on \'The Apprentice\' were, to a very large extent, dependent on their sex appeal.',
     'I have black guys counting my money. … I hate it. The only guys I want counting my money are short guys that wear yarmulkes all day.',
@@ -76,15 +77,16 @@ const handlers = {
         const quotes = data;
         const index = Math.floor(Math.random() * quotes.length);
         const randomQuote = quotes[index];
-        const shouldEndSession = false;
-
         const speechOutput = randomQuote;
-        // this.response.cardRenderer(skillName, randomQuote);
         this.response.cardRenderer(skillName, randomQuote, {smallImageUrl: imageURL, largeImageUrl: imageURL});
-
-        this.response.speak(speechOutput);
+        this.response.speak(speechOutput + delay + repromptSpeech);
         this.response.shouldEndSession(false);
-
+        this.emit(':responseReady');
+    },
+    'Stop': function () {
+        console.log("Stop intent initiated");
+        this.response.speak(stopMessage);
+        this.response.shouldEndSession(true);
         this.emit(':responseReady');
     },
     'AMAZON.HelpIntent': function () {
@@ -102,6 +104,7 @@ const handlers = {
         this.emit(':responseReady');
     },
     'SessionEndedRequest': function () {
+        this.response.speak(stopMessage);
         console.log(`Session ended: ${this.event.request.reason}`);
     },
     'Unhandled': function () {
